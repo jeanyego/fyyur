@@ -1,7 +1,12 @@
+from cgitb import text
 from datetime import datetime
+from email import message
+import numbers
+# from re import RegexFlag
+import re
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField,IntegerField
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -82,9 +87,11 @@ class VenueForm(Form):
     address = StringField(
         'address', validators=[DataRequired()]
     )
-    phone = StringField(
-        'phone'
-    )
+    phone = IntegerField(
+   'phone', validators=[DataRequired(),  
+     
+     ]    
+        )
     image_link = StringField(
         'image_link'
     )
@@ -117,9 +124,8 @@ class VenueForm(Form):
         'facebook_link', validators=[URL()]
     )
     website_link = StringField(
-        'website_link'
-    )
-
+      'website_link', validators=[URL()]
+    )    
     seeking_talent = BooleanField( 'seeking_talent' )
 
     seeking_description = StringField(
@@ -191,9 +197,14 @@ class ArtistForm(Form):
             ('WY', 'WY'),
         ]
     )
-    phone = StringField(
+    phone = IntegerField(
         # TODO implement validation logic for phone 
-        'phone'
+        'phone', validators=[DataRequired()
+        # Regexp(
+        #   re.findall(r"\+?[\d]{3}-[\d]2}-[\d]{3}-[\d]{3}",
+        #   "phone must only contain numbers")
+        # )
+        ]
     )
     image_link = StringField(
         'image_link'
@@ -228,8 +239,8 @@ class ArtistForm(Form):
      )
 
     website_link = StringField(
-        'website_link'
-     )
+      'website_link', validators=[URL()]
+     )     
 
     seeking_venue = BooleanField( 'seeking_venue' )
 

@@ -60,7 +60,7 @@ app.jinja_env.filters['datetime'] = format_datetime
 @app.route('/')
 def index():
   return render_template('pages/home.html')
-  
+
 #  Venues
 #  ----------------------------------------------------------------
 
@@ -110,6 +110,10 @@ def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
   venue = Venue.query.get(venue_id)
+  # genres = []
+  # for item in (Venue.query.get(venue_id)).genres:
+  #           genres.append(item.genre)
+
   pastshows = db.session.query(Show, Artist).join(Artist).join(Venue).filter(Show.venue_id==venue_id).filter(Show.start_time<datetime.now()).all()
   past_shows =[]
   for show in pastshows:
@@ -139,7 +143,7 @@ def show_venue(venue_id):
     'state': venue.state,
     'address': venue.address,
     'phone': venue.phone,
-    'genre': [venue.genres],
+    'genres':[venue.genres],
     'image_link':venue.image_link,
     'facebook_link':venue.facebook_link,
     'website_link':venue.website_link,
@@ -165,7 +169,10 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
+  form = VenueForm()
+#  if form.validate_on_submit():
   error= False
+  seeking_talent = False
   if 'seeking_talent' in request.form:
             seeking_talent = request.form['seeking_talent'] == 'y'
   add_venue=Venue(
@@ -200,8 +207,11 @@ def create_venue_submission():
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   finally:
     db.session.close()
+#  else:
+#     for field, message in form.errors.items():
+#        flash(field + ' - ' + str(message), 'danger')
+      #  flash("Form not valid")
   return render_template('pages/home.html')
-
 @app.route('/venues/<int:venue_id>/delete', methods=['DELETE'])
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
@@ -259,8 +269,8 @@ def search_artists():
 def show_artist(artist_id):
   # shows the artist page with the given artist_id
   # TODO: replace with real artist data from the artist table, using artist_id
-  # for item in requested_venue.genres:
-  #           genres.append(item.genre)
+  
+  genres = request.form.getlist("genres")
   artist = Artist.query.get(artist_id)  
   pastshows = db.session.query(Show, Venue).join(Artist).join(Venue).filter(Show.artist_id==artist_id).filter(Show.start_time<datetime.now()).all()
   past_shows =[]
@@ -290,7 +300,7 @@ def show_artist(artist_id):
     'city': artist.city,
     'state': artist.state,
     'phone': artist.phone,
-    'genre': [artist.genres],
+    'genres': [artist.genres],
     'image_link':artist.image_link,
     'facebook_link':artist.facebook_link,
     'website_link':artist.website_link,
@@ -407,11 +417,14 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-  error= False
-  seeking_venue = False
-  if 'seeking_venue' in request.form:
+ form = ArtistForm()
+#  if form.validate_on_submit():
+
+ error= False
+ seeking_venue = False
+ if 'seeking_venue' in request.form:
             seeking_venue = request.form['seeking_venue'] == 'y'
-  add_artist=Artist(
+ add_artist=Artist(
     name = request.form.get('name'),
     city = request.form.get("city"),
     state = request.form.get("state"),
@@ -425,13 +438,13 @@ def create_artist_submission():
     )
  
   # TODO: modify data to be the data object returned from db insertion
-  try:
+ try:
     db.session.add(add_artist)
     db.session.commit()
   # on successful db insert, flash success
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
   # TODO: on unsuccessful db insert, flash an error instead.
-  except:
+ except:
     error = True
     db.session.rollback()
     print(sys.exc_info())
@@ -440,11 +453,16 @@ def create_artist_submission():
 
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  finally:
+ finally:
     db.session.close()
-  return render_template('pages/home.html')
+ return render_template('pages/home.html')
+# else:
+#   flash("Form not valid")
+#        for field, message in form.errors.items():
+#             flash(field + ' - ' + str(message), 'danger')
+    
 #  Shows
-#  ----------------------------------------------------------------
+#  --------------------------------------------------------------  
 
 @app.route('/shows')
 def shows():
